@@ -5,6 +5,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/markbates/goth/gothic"
@@ -127,6 +128,7 @@ func provider_callback(ctx *gin.Context) {
 		UserID: usr.UserID, 
 		TokenID: database.GenID(), 
 		BaseID: "",
+		Exptime: time.Now().AddDate(1,0,0),
 	})
 
 	//エラー処理
