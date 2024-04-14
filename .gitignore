@@ -1,0 +1,4 @@
+/postgresql
+__debug_bin*
+.env
+*.db
