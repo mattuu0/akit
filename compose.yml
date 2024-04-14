@@ -1,0 +1,54 @@
+version: '3'
+services:
+    auth:
+        image: golang:1.22.2-bullseye
+        container_name: auth_Server
+        ports:
+            - "11333:11333"
+        volumes:
+            - ./auth/share:/root/share
+        build: ./auth
+        tty: true
+        
+    app:
+        image: golang:1.22.2-bullseye
+        container_name: app_Server
+        ports:
+            - "11334:11334"
+        volumes:
+            - ./app/share:/root/share
+        build: ./app
+        tty: true
+
+    redis:
+        container_name: redis
+        image: "redis:latest"
+        ports:
+            - "6379:6379"
+        restart: always
+
+    postgresql:
+        container_name: postregres
+        image: postgres:12.18-bullseye
+        environment:
+            - TZ=Asia/Tokyo
+        ports:
+            - "15432:5432"
+        env_file:
+            - .env
+        volumes:
+            - ./postgresql:/var/lib/postgresql/data
+        restart: always
+
+    nginx:
+        restart: always
+        image: nginx:latest
+        container_name: nginx
+        ports:
+            - "8443:80"
+        volumes:
+            # NGINXのコンフィグファイルをホストOSから、ゲストOSに連結する
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+            - ./nginx/keys:/etc/nginx/keys
+            - ./nginx/statics:/etc/nginx/static/statics
+        tty: true
