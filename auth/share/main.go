@@ -128,6 +128,7 @@ func provider_callback(ctx *gin.Context) {
 		UserID: usr.UserID, 
 		TokenID: database.GenID(), 
 		BaseID: "",
+		UserAgent: ctx.Request.UserAgent(),
 		Exptime: time.Now().AddDate(1,0,0),
 	})
 
