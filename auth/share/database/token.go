@@ -3,14 +3,17 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/vmihailenco/msgpack/v5"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/vmihailenco/msgpack/v5"
+
+	"github.com/google/uuid"
 )
 
 var (
@@ -200,11 +203,12 @@ func ValidToken(tokenString string) (Token,bool) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte("JWT_Secret"), nil
+		return []byte(os.Getenv("JWT_Secret")), nil
 	})
 
 	//エラー処理
 	if err != nil {
+		log.Println(err)
 		return Token{}, false
 	}
 
@@ -224,4 +228,18 @@ func ValidToken(tokenString string) (Token,bool) {
 	}
 
 	return Token{}, false
+}
+
+//ID生成
+func GenID() string {
+	//ID生成
+	uid,err := uuid.NewRandom()
+
+	//エラー処理
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	return uid.String()
 }

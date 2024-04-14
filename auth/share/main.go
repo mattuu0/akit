@@ -14,8 +14,23 @@ import (
 func main() {
 	Init()
 
+	//ルーティング
 	router := gin.Default()
+
+	//ミドルウェア設定
+	router.Use(Middleware())
+
 	router.GET("/ping", func(ctx *gin.Context) {
+		log.Println(ctx.GetBool("success"))
+
+		if ctx.GetBool("success") {
+			ctx.JSON(http.StatusOK, gin.H{
+				"message": "pong",
+				"user":    ctx.MustGet("user"),
+				"token":   ctx.GetString("token"),
+			})
+			return
+		}
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
@@ -107,9 +122,25 @@ func provider_callback(ctx *gin.Context) {
 		return
 	}
 
-	log.Println(usr)
+	//トークン生成
+	token,err := database.GenToken(database.Token{
+		UserID: usr.UserID, 
+		TokenID: database.GenID(), 
+		BaseID: "",
+	})
+
+	//エラー処理
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusOK, gin.H{"message": "failed"})
+		return
+	}
+
+	//LAX Cookie
+	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetCookie("token", token, 3600000, "/", "", false, true)
 	//リダイレクト
-	ctx.Redirect(http.StatusFound, "/")
+	ctx.Redirect(http.StatusFound, "/auth/ping")
 }
 
 // 認証

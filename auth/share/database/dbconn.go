@@ -24,7 +24,9 @@ func Init() {
 	dbconn = db
 
 	//テーブル作成
-	err = dbconn.AutoMigrate(&User{})
+	err = dbconn.AutoMigrate(
+		&Token{}, &User{},
+	)
 
 	//エラー処理
 	if err != nil {

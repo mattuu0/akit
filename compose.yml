@@ -9,7 +9,8 @@ services:
             - ./auth/share:/root/share
         build: ./auth
         tty: true
-        
+        restart: always
+
     app:
         image: golang:1.22.2-bullseye
         container_name: app_Server
@@ -19,6 +20,7 @@ services:
             - ./app/share:/root/share
         build: ./app
         tty: true
+        restart: always
 
     redis:
         container_name: redis
