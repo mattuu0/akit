@@ -1,0 +1,47 @@
+syntax = "proto3";
+package auth;
+
+option go_package = "../agrpc";
+
+message GetData {
+    string Token = 1;
+    string Secret = 2;
+}
+
+message TokenResult {
+    string Token = 1;
+    bool Success = 2;
+}
+
+message VerifyToken {
+    string Token = 1;
+}
+
+message VerifyResult {
+    bool Success = 1;
+    User user = 2;
+}
+
+message User {
+    string UserId = 1;
+    string Name = 2;
+    string Email = 3;
+    string Icon = 4;
+    string Provider = 5;
+    string ProviderUID = 6;
+}
+
+message LogoutToken {
+    string token = 1;
+    string secret = 2;
+}
+
+message LogoutResult {
+    bool success = 1;
+}
+
+service AuthService {
+    rpc GetToken(GetData) returns (TokenResult) {}
+    rpc Verify(VerifyToken) returns (VerifyResult) {}
+    rpc Logout(LogoutToken) returns (LogoutResult) {}
+}
