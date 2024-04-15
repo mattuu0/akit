@@ -243,3 +243,46 @@ func GenID() string {
 
 	return uid.String()
 }
+
+//更新用トークン発行
+func UpdateToken(base_token Token) (string, error) {
+	//有効期限5分のトークン発行
+	new_token,err := GenToken(Token{
+		UserID: base_token.UserID,
+		TokenID: GenID(),
+		BaseID: base_token.TokenID,
+		Exptime: time.Now().Add(time.Minute * 5),
+	})
+
+	//エラー処理
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+
+	return new_token, nil
+}
+
+func SubmitUpdate(token Token) error {
+	//古いトークン削除
+	err := DeleteToken(token.BaseID)
+
+	//エラー処理
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	//有効期限更新
+	token.Exptime = time.Now().Add(time.Hour * 24)
+	//新しいトークンの有効期限更新
+	err = RegisterToken(token)
+
+	//エラー処理
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
