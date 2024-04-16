@@ -107,9 +107,8 @@ func provider_callback(ctx *gin.Context) {
 		return
 	}
 
-	//LAX Cookie 1ヶ月
-	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("token", token, 2592000, "/", "", true, true)
+	//認証トークンを設定
+	SetToken(ctx, token)
 	//リダイレクト
 	ctx.Redirect(http.StatusFound, "/statics/")
 }
@@ -127,4 +126,91 @@ func provider_auth(ctx *gin.Context) {
 // プロバイダ取得
 func contextWithProviderName(ctx *gin.Context, provider string) *http.Request {
 	return ctx.Request.WithContext(context.WithValue(ctx.Request.Context(), "provider", provider))
+}
+
+//トークン更新
+func RefreshToken(ctx *gin.Context) {
+	//認証されているか
+	if !ctx.GetBool("success") {
+		//されていないとき
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "unauthorized",
+		})
+		return
+	}
+
+	//トークン取得
+	token,exits := ctx.Get("token")
+
+	//トークン無し
+	if !exits {
+		//エラーを返す
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "unauthorized",
+		})
+		return
+	}
+
+	//トークン解析
+	token_data,_ := database.ValidToken(token.(string))
+
+	//新しいトークン取得
+	new_token,err := database.UpdateToken(token_data)
+
+	//エラー処理
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "failed",
+		})
+		return
+	}
+
+	//トークン設定
+	SetToken(ctx, new_token)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "success",
+	})
+}
+
+//トークン更新確定
+func SubmitToken(ctx *gin.Context) {
+	//認証されているか
+	if !ctx.GetBool("success") {
+		//されていないとき
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "unauthorized",
+		})
+		return
+	}
+
+	//トークン取得
+	token,exits := ctx.Get("token")
+
+	//トークン無し
+	if !exits {
+		//エラーを返す
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "unauthorized",
+		})
+		return
+	}
+
+	//トークン解析
+	token_data,_ := database.ValidToken(token.(string))
+
+	//更新確定
+	err := database.SubmitUpdate(token_data)
+
+	//エラー処理
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": "failed",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "success",
+	})
 }

@@ -252,6 +252,7 @@ func UpdateToken(base_token Token) (string, error) {
 		TokenID: GenID(),
 		BaseID: base_token.TokenID,
 		Exptime: time.Now().Add(time.Minute * 5),
+		UserAgent: base_token.UserAgent,
 	})
 
 	//エラー処理
