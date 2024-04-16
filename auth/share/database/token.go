@@ -273,8 +273,8 @@ func SubmitUpdate(token Token) error {
 		return err
 	}
 
-	//有効期限更新
-	token.Exptime = time.Now().Add(time.Hour * 24)
+	//有効期限1ヶ月
+	token.Exptime = time.Now().AddDate(0,1,0)
 	//新しいトークンの有効期限更新
 	err = RegisterToken(token)
 

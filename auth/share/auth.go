@@ -97,7 +97,7 @@ func provider_callback(ctx *gin.Context) {
 		TokenID: database.GenID(), 
 		BaseID: "",
 		UserAgent: ctx.Request.UserAgent(),
-		Exptime: time.Now().AddDate(1,0,0),
+		Exptime: time.Now().AddDate(0,1,0),	//有効期限1ヶ月
 	})
 
 	//エラー処理
@@ -107,11 +107,11 @@ func provider_callback(ctx *gin.Context) {
 		return
 	}
 
-	//LAX Cookie
+	//LAX Cookie 1ヶ月
 	ctx.SetSameSite(http.SameSiteLaxMode)
-	ctx.SetCookie("token", token, 3600000, "/", "", false, true)
+	ctx.SetCookie("token", token, 2592000, "/", "", true, true)
 	//リダイレクト
-	ctx.Redirect(http.StatusFound, "/auth/ping")
+	ctx.Redirect(http.StatusFound, "/statics/")
 }
 
 // 認証
