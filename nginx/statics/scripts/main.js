@@ -1,3 +1,5 @@
+const status_h1 = document.getElementById('status_h1');
+
 async function Refresh() {
     const req = await fetch('/auth/refresh', {
         method: 'POST',
@@ -21,4 +23,23 @@ async function Refresh() {
     return true;
 }
 
-Refresh();
+Refresh().then((result) => {
+    if (!result) {
+        status_h1.textContent = "ログインしていません";
+        return;
+    }
+
+    status_h1.textContent = "ログイン中です";
+});
+
+const logout_btn = document.getElementById('logout_btn');
+
+logout_btn.addEventListener('click', () => {
+    fetch('/auth/logout', {
+        method: 'POST',
+    }).then((res) => {
+        if (res.status === 200) {
+            status_h1.textContent = "ログアウトしました";
+        }
+    })
+})

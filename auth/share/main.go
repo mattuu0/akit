@@ -35,6 +35,31 @@ func main() {
 		})
 	})
 
+	//ログアウト
+	router.POST("/logout", func(ctx *gin.Context) {
+		//認証されているか
+		if ctx.GetBool("success") {
+			//トークン無効化
+			err := database.DeleteToken(ctx.GetString("token"))
+
+			//エラー処理
+			if err != nil {
+				log.Println(err)
+				ctx.JSON(500, gin.H{
+					"message": "internal server error",
+				})
+				return
+			}
+			//認証されている場合
+			SetToken(ctx, "")
+		} else {
+			//認証されていない場合
+			ctx.JSON(401, gin.H{
+				"message": "unauthorized",
+			})
+		}
+	})
+
 	//トークン更新用
 	router.POST("/refresh",RefreshToken)
 

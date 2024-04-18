@@ -3,6 +3,7 @@ package main
 import (
 	"authkit/database"
 	"context"
+
 	"github.com/markbates/goth/gothic"
 	"gorm.io/gorm"
 
@@ -213,4 +214,19 @@ func SubmitToken(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "success",
 	})
+}
+
+func GetRedirect_URL(ctx *gin.Context) {
+	//リダイレクトURL取得
+	redirect_url := ctx.DefaultQuery("redirect_url","")
+
+	//URL検証
+	if redirect_url == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "redirect url is not valid",
+		})
+		return
+	}
+	
+	
 }
