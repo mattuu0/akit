@@ -2,6 +2,7 @@ package main
 
 import (
 	"authkit/database"
+	"authkit/transcation"
 	"log"
 	"os"
 	"strconv"
@@ -63,6 +64,9 @@ func gothic_init() {
 
 	//認証設定
 	gothic.Store = store
+
+	//トランザクション初期化
+	transcation.Init()
 }
 
 //環境変数読み込み

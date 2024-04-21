@@ -1,10 +1,14 @@
 package auth_grpc
 
 import (
+	"errors"
 	"log"
 	"net"
+	"os"
 
 	"authkit/auth_grpc/agrpc"
+	"authkit/transcation"
+
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -50,6 +54,28 @@ func (auths *AuthService) GetToken(
 	ctx context.Context,
 	token *agrpc.GetData,
 ) (*agrpc.TokenResult, error) {
-	log.Print(token)
-	return &agrpc.TokenResult{}, nil
+	//シークレットを検証する
+	if token.Secret != os.Getenv("Token_Secret") {
+		//トークンが一致しない場合
+		log.Println("invalid secret")
+		return &agrpc.TokenResult{
+			Success: false,
+		}, errors.New("invalid secret")
+	}
+
+	//トークンを取得する
+	get_token,err := transcation.GetToken(token.Token)
+
+	//エラー処理
+	if err != nil {
+		log.Println(err)
+		return &agrpc.TokenResult{
+			Success: false,
+		}, err
+	}
+
+	return &agrpc.TokenResult{
+		Success: true,
+		Token:   get_token,
+	}, nil
 }

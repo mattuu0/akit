@@ -2,8 +2,11 @@ package main
 
 import (
 	"authkit/database"
+	"authkit/transcation"
 	"context"
+	"errors"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/markbates/goth/gothic"
 	"gorm.io/gorm"
 
@@ -27,7 +30,7 @@ func provider_callback(ctx *gin.Context) {
 	//エラー処理
 	if err != nil {
 		log.Println(err)
-		ctx.JSON(http.StatusOK, gin.H{"message": "failed"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "failed to complete user auth"}) 
 		return
 	}
 
@@ -54,7 +57,7 @@ func provider_callback(ctx *gin.Context) {
 		//エラー処理
 		if err != nil {
 			log.Println(err)
-			ctx.JSON(http.StatusOK, gin.H{"message": "failed"})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "failed to create user"})
 			return
 		}
 
@@ -64,13 +67,13 @@ func provider_callback(ctx *gin.Context) {
 		//エラー処理
 		if err != nil {
 			log.Println(err)
-			ctx.JSON(http.StatusOK, gin.H{"message": "failed"})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"message": "failed to get user"})
 			return
 		}
 	} else if err != nil {
 		//それ以外のエラー
 		log.Println(err)
-		ctx.JSON(http.StatusOK, gin.H{"message": "failed"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "failed to get user"})
 		return
 	}
 
@@ -88,7 +91,7 @@ func provider_callback(ctx *gin.Context) {
 	//エラー処理
 	if err != nil {
 		log.Println(err)
-		ctx.JSON(http.StatusOK, gin.H{"message": "failed"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "failed to update user"})
 		return
 	}
 
@@ -104,18 +107,47 @@ func provider_callback(ctx *gin.Context) {
 	//エラー処理
 	if err != nil {
 		log.Println(err)
-		ctx.JSON(http.StatusOK, gin.H{"message": "failed"})
+		ctx.JSON(http.StatusOK, gin.H{"message": "failed to generate token"})
 		return
 	}
 
 	//認証トークンを設定
-	SetToken(ctx, token)
+	tokenid,err := transcation.SaveToken(token)
+
+	//エラー処理
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"message": "failed to save token"})
+		return
+	}
+
+	//リダイレクトURL取得
+	redirect_url,err := GetRedirect_URL(ctx)
+
+	log.Println(redirect_url)
+	//エラー処理
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusOK, gin.H{"message": "invalid redirect_url"})
+		return
+	}
+
 	//リダイレクト
-	ctx.Redirect(http.StatusFound, "/statics/")
+	ctx.Redirect(http.StatusFound, redirect_url + "?token=" + tokenid)
 }
 
 // 認証
 func provider_auth(ctx *gin.Context) {
+	//リダイレクトURL設定
+	err := SetRedirect_URL(ctx)
+
+	//エラー処理
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusOK, gin.H{"message": "failed to set redirect_url"})
+		return
+	}
+
 	//プロバイダ設定
 	provider := ctx.Param("provider")
 	ctx.Request = contextWithProviderName(ctx, provider)
@@ -216,17 +248,41 @@ func SubmitToken(ctx *gin.Context) {
 	})
 }
 
-func GetRedirect_URL(ctx *gin.Context) {
+func SetRedirect_URL(ctx *gin.Context) (error) {
 	//リダイレクトURL取得
 	redirect_url := ctx.DefaultQuery("redirect_url","")
 
 	//URL検証
 	if redirect_url == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "redirect url is not valid",
-		})
-		return
+		return errors.New("redirect_url is required")
 	}
-	
-	
+
+	//セッション取得
+	session := sessions.Default(ctx)
+	//URL格納
+	session.Set("redirect_url", redirect_url)
+	err := session.Save()
+
+	//エラー処理
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+
+func GetRedirect_URL(ctx *gin.Context) (string,error) {
+	//セッション取得
+	session := sessions.Default(ctx)
+
+	//リダイレクトURL取得
+	redirect_url := session.Get("redirect_url")
+
+	//存在するか
+	if redirect_url == nil {
+		return "",errors.New("redirect_url is not found")
+	}
+
+	return redirect_url.(string), nil
 }

@@ -4,8 +4,12 @@ import (
 	"authkit/database"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 )
 
 
@@ -17,6 +21,10 @@ func main() {
 
 	//ミドルウェア設定
 	router.Use(Middleware())
+
+	//ストア設定
+	store := cookie.NewStore([]byte(os.Getenv("Transaction_Store_Secret")))
+	router.Use(sessions.Sessions("AuthSession", store))
 
 	router.POST("/getuser", func(ctx *gin.Context) {
 		log.Println(ctx.GetBool("success"))
