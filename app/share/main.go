@@ -2,9 +2,13 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+
+	"app/auth_grpc/client"
 )
 
 func main() {
+	
+
 	router := gin.Default()
 
 	router.GET("/", func(ctx *gin.Context) {

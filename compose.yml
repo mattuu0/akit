@@ -18,6 +18,7 @@ services:
             - "11334:11334"
         volumes:
             - ./app/share:/root/share
+            - ./auth/share/auth_grpc:/root/share/auth_grpc
         build: ./app
         tty: true
         restart: always
