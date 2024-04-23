@@ -40,8 +40,20 @@ message LogoutResult {
     bool success = 1;
 }
 
+message RefreshToken {
+    string token = 1;
+    string secret = 2;
+}
+
+message RefreshResult {
+    bool success = 1;
+    string token = 2;
+}
+
 service AuthService {
-    rpc GetToken(GetData) returns (TokenResult) {}
-    rpc Verify(VerifyToken) returns (VerifyResult) {}
-    rpc Logout(LogoutToken) returns (LogoutResult) {}
+    rpc GetToken(GetData) returns (TokenResult) {}              //トークンを取得(引き換え)する
+    rpc Refresh(RefreshToken) returns (RefreshResult) {}        //更新を開始する
+    rpc RefreshS(RefreshToken) returns (RefreshResult) {}       //更新を確定する
+    rpc Verify(VerifyToken) returns (VerifyResult) {}           //トークンを認証する
+    rpc Logout(LogoutToken) returns (LogoutResult) {}           //トークンを無効化する
 }
