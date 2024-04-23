@@ -1,4 +1,4 @@
-package auth_grpc
+package server
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func main() {
+func Init() {
 	log.Print("main start")
 
 	// 9000番ポートでクライアントからのリクエストを受け付けるようにする
@@ -203,6 +203,7 @@ func (auths *AuthService) GetToken(
 	ctx context.Context,
 	token *agrpc.GetData,
 ) (*agrpc.TokenResult, error) {
+	log.Println(token.Secret)
 	//シークレットを検証する
 	if token.Secret != os.Getenv("Token_Secret") {
 		//トークンが一致しない場合

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"authkit/auth_grpc/server"
 	"authkit/database"
 	"authkit/transcation"
 	"log"
@@ -32,6 +33,9 @@ func Init() {
 
 	//DB初期化
 	database.Init()
+
+	//GRPC初期化
+	go server.Init()
 }
 
 //プロバイダ初期化

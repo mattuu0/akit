@@ -1,7 +1,7 @@
 const status_h1 = document.getElementById('status_h1');
 
 async function Refresh() {
-    const req = await fetch('/auth/refresh', {
+    const req = await fetch('/app/refresh', {
         method: 'POST',
     });
 
@@ -11,7 +11,7 @@ async function Refresh() {
     }
 
     //更新確定
-    const sreq = await fetch('/auth/refreshs', {
+    const sreq = await fetch('/app/refreshs', {
         method: 'POST',
     })
 
@@ -35,7 +35,7 @@ Refresh().then((result) => {
 const logout_btn = document.getElementById('logout_btn');
 
 logout_btn.addEventListener('click', () => {
-    fetch('/auth/logout', {
+    fetch('/app/logout', {
         method: 'POST',
     }).then((res) => {
         if (res.status === 200) {

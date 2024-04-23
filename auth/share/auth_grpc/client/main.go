@@ -4,7 +4,6 @@ import (
 	"app/auth_grpc/agrpc"
 	"errors"
 	"log"
-	"os"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -18,7 +17,7 @@ var (
 
 func Init(Secret string) (error) {
 	//コネクション確立
-	conn, err := grpc.Dial(":9000", grpc.WithInsecure())
+	conn, err := grpc.Dial("auth_Server:9000", grpc.WithInsecure())
 	if err != nil {
 		log.Printf("did not connect: %s", err)
 		return err
@@ -38,7 +37,7 @@ func Init(Secret string) (error) {
 func GetToken(token string) (string, error) {
 	//トークンを取得
 	result, err := client.GetToken(context.Background(), &agrpc.GetData{
-		Secret: os.Getenv("Token_Secret"),
+		Secret: secret,
 		Token: token,
 	})
 
@@ -78,7 +77,7 @@ func VerifyToken(token string) (*agrpc.User, error) {
 func Logout(token string) error {
 	//トークンを削除
 	result, err := client.Logout(context.Background(), &agrpc.LogoutToken{
-		Secret: os.Getenv("Token_Secret"),
+		Secret: secret,
 		Token: token,
 	})
 
@@ -92,5 +91,47 @@ func Logout(token string) error {
 		return errors.New("failed to logout")
 	}
 	
+	return nil
+}
+
+//更新する関数
+func RefreshToken(token string) (string, error) {
+	//トークンを更新
+	result, err := client.Refresh(context.Background(), &agrpc.RefreshToken{
+		Secret: secret,
+		Token: token,
+	})
+
+	//エラー処理
+	if err != nil {
+		return "", err
+	}
+
+	//更新に失敗したとき
+	if !result.Success {
+		return "", errors.New("failed to refresh token")
+	}
+
+	return result.Token, nil
+}
+
+//更新を確定する関数
+func RefreshTokenS(token string) error {
+	//トークンを更新
+	result, err := client.RefreshS(context.Background(), &agrpc.RefreshToken{
+		Secret: secret,
+		Token: token,
+	})
+
+	//エラー処理
+	if err != nil {
+		return err
+	}
+
+	//更新に失敗したとき
+	if !result.Success {
+		return errors.New("failed to refresh token")
+	}
+
 	return nil
 }
