@@ -111,6 +111,11 @@ func provider_callback(ctx *gin.Context) {
 		return
 	}
 
+	log.Println(user.Name)
+	log.Println(user.FirstName)
+	log.Println(user.LastName)
+	log.Println(user.NickName)
+
 	//認証トークンを設定
 	tokenid,err := transcation.SaveToken(token)
 

@@ -17,11 +17,11 @@ import (
 )
 
 var (
-	redis_conn *redis.Client = nil
-	sign_method = jwt.SigningMethodHS512
+	redis_conn  *redis.Client = nil
+	sign_method               = jwt.SigningMethodHS512
 )
 
-//文字列を数字に変える
+// 文字列を数字に変える
 func String_To_Int(s string) int {
 	i, _ := strconv.Atoi(s)
 	return i
@@ -30,13 +30,15 @@ func String_To_Int(s string) int {
 func TokenInit() {
 	//Redis接続
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s",os.Getenv("Redis_Host"), os.Getenv("Redis_Port")),
-		Password: os.Getenv("Redis_Password"), // no password set
-		DB:       String_To_Int(os.Getenv("Token_Redis_DB")),  // use default DB
+		Addr:     fmt.Sprintf("%s:%s", os.Getenv("Redis_Host"), os.Getenv("Redis_Port")),
+		Password: os.Getenv("Redis_Password"),                // no password set
+		DB:       String_To_Int(os.Getenv("Token_Redis_DB")), // use default DB
 	})
 
 	//グローバル変数に格納
 	redis_conn = rdb
+
+	go deleteExpired()
 }
 
 type Token struct {
@@ -47,10 +49,10 @@ type Token struct {
 	Exptime   time.Time
 }
 
-//エンコード
-func (token Token) Encode() (string,error) {
+// エンコード
+func (token Token) Encode() (string, error) {
 	//マーシャル
-	bin,err := msgpack.Marshal(token)
+	bin, err := msgpack.Marshal(token)
 
 	//エラー処理
 	if err != nil {
@@ -60,7 +62,7 @@ func (token Token) Encode() (string,error) {
 	return string(bin), nil
 }
 
-//デコード
+// デコード
 func DecodeToken(token_str string) (Token, error) {
 	//デコード
 	var token Token
@@ -79,7 +81,7 @@ func GetToken(tokenID string) (Token, error) {
 	ctx := context.Background()
 
 	//トークン取得
-	result,err := redis_conn.Get(ctx, tokenID).Result()
+	result, err := redis_conn.Get(ctx, tokenID).Result()
 
 	//エラー処理
 	if err != nil {
@@ -95,7 +97,7 @@ func GetToken(tokenID string) (Token, error) {
 		}
 
 		//エンコード
-		token_str,err := token.Encode()
+		token_str, err := token.Encode()
 
 		//エラー処理
 		if err != nil {
@@ -103,7 +105,7 @@ func GetToken(tokenID string) (Token, error) {
 		}
 
 		//キャッシュにセット (有効期限 1時間)
-		err = redis_conn.Set(ctx, tokenID, token_str, time.Duration(time.Hour * 1)).Err()
+		err = redis_conn.Set(ctx, tokenID, token_str, time.Duration(time.Hour*1)).Err()
 
 		//エラー処理
 		if err != nil {
@@ -114,7 +116,7 @@ func GetToken(tokenID string) (Token, error) {
 	}
 
 	//トークンデコード
-	token,err := DecodeToken(result)
+	token, err := DecodeToken(result)
 
 	//エラー処理
 	if err != nil {
@@ -136,7 +138,7 @@ func DeleteToken(tokenID string) error {
 	return nil
 }
 
-//トークン登録
+// トークン登録
 func RegisterToken(token Token) error {
 	//トークン作成
 	result := dbconn.Save(&token)
@@ -147,7 +149,7 @@ func RegisterToken(token Token) error {
 	}
 
 	//エンコード
-	token_str,err := token.Encode()
+	token_str, err := token.Encode()
 
 	//エラー処理
 	if err != nil {
@@ -155,7 +157,7 @@ func RegisterToken(token Token) error {
 	}
 
 	//キャッシュにセット (有効期限 1時間)
-	err = redis_conn.Set(context.Background(), token.TokenID, token_str, time.Duration(time.Hour * 1)).Err()
+	err = redis_conn.Set(context.Background(), token.TokenID, token_str, time.Duration(time.Hour*1)).Err()
 
 	//エラー処理
 	if err != nil {
@@ -165,20 +167,20 @@ func RegisterToken(token Token) error {
 	return nil
 }
 
-//トークン生成
+// トークン生成
 func GenToken(token_data Token) (string, error) {
 	//トークン作成
 	claims := jwt.MapClaims{
-		"userid" : token_data.UserID,
-		"tokenid" : token_data.TokenID,
-		"baseid" : token_data.BaseID,
+		"userid":  token_data.UserID,
+		"tokenid": token_data.TokenID,
+		"baseid":  token_data.BaseID,
 	}
 
 	//トークン生成
 	token_str := jwt.NewWithClaims(sign_method, claims)
 
 	//トークン署名
-	token,err := token_str.SignedString([]byte(os.Getenv("JWT_Secret")))
+	token, err := token_str.SignedString([]byte(os.Getenv("JWT_Secret")))
 
 	//エラー処理
 	if err != nil {
@@ -193,10 +195,10 @@ func GenToken(token_data Token) (string, error) {
 		return "", err
 	}
 
-	return token,err
+	return token, err
 }
 
-func ValidToken(tokenString string) (Token,bool) {
+func ValidToken(tokenString string) (Token, bool) {
 	//トークン検証
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -217,7 +219,7 @@ func ValidToken(tokenString string) (Token,bool) {
 		//トークンID
 		tokenID := claims["tokenid"].(string)
 		//トークン取得
-		token,err := GetToken(tokenID)
+		token, err := GetToken(tokenID)
 
 		//エラー処理
 		if err != nil {
@@ -230,10 +232,10 @@ func ValidToken(tokenString string) (Token,bool) {
 	return Token{}, false
 }
 
-//ID生成
+// ID生成
 func GenID() string {
 	//ID生成
-	uid,err := uuid.NewRandom()
+	uid, err := uuid.NewRandom()
 
 	//エラー処理
 	if err != nil {
@@ -244,14 +246,14 @@ func GenID() string {
 	return uid.String()
 }
 
-//更新用トークン発行
+// 更新用トークン発行
 func UpdateToken(base_token Token) (string, error) {
 	//有効期限5分のトークン発行
-	new_token,err := GenToken(Token{
-		UserID: base_token.UserID,
-		TokenID: GenID(),
-		BaseID: base_token.TokenID,
-		Exptime: time.Now().Add(time.Minute * 5),
+	new_token, err := GenToken(Token{
+		UserID:    base_token.UserID,
+		TokenID:   GenID(),
+		BaseID:    base_token.TokenID,
+		Exptime:   time.Now().Add(time.Minute * 5),
 		UserAgent: base_token.UserAgent,
 	})
 
@@ -275,7 +277,7 @@ func SubmitUpdate(token Token) error {
 	}
 
 	//有効期限1ヶ月
-	token.Exptime = time.Now().AddDate(0,1,0)
+	token.Exptime = time.Now().AddDate(0, 1, 0)
 	//新しいトークンの有効期限更新
 	err = RegisterToken(token)
 
@@ -286,4 +288,37 @@ func SubmitUpdate(token Token) error {
 	}
 
 	return nil
+}
+
+// 期限切れトークン削除
+func deleteExpired() error {
+	for {
+		//10秒スリープ
+		time.Sleep(time.Second * 3)
+
+		//トークン取得
+		var tokens []Token
+		result := dbconn.Where("Exptime < ?", time.Now()).Find(&tokens)
+
+		//エラー処理
+		if result.Error != nil {
+			log.Println("delete error", result.Error)
+			continue
+		}
+
+		//for で回す
+		for i := 0; i < len(tokens); i++ {
+			//トークン削除
+			err := DeleteToken(tokens[i].TokenID)
+			//エラー処理
+			if err != nil {
+				log.Println("delete error", result.Error)
+				continue
+			}
+		}
+
+		if result.RowsAffected != 0 {
+			log.Println("delete rows", result.RowsAffected)
+		}
+	}
 }

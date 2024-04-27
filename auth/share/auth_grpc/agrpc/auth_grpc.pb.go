@@ -19,11 +19,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	AuthService_GetToken_FullMethodName = "/auth.AuthService/GetToken"
-	AuthService_Refresh_FullMethodName  = "/auth.AuthService/Refresh"
-	AuthService_RefreshS_FullMethodName = "/auth.AuthService/RefreshS"
-	AuthService_Verify_FullMethodName   = "/auth.AuthService/Verify"
-	AuthService_Logout_FullMethodName   = "/auth.AuthService/Logout"
+	AuthService_GetToken_FullMethodName    = "/auth.AuthService/GetToken"
+	AuthService_Refresh_FullMethodName     = "/auth.AuthService/Refresh"
+	AuthService_RefreshS_FullMethodName    = "/auth.AuthService/RefreshS"
+	AuthService_Verify_FullMethodName      = "/auth.AuthService/Verify"
+	AuthService_Logout_FullMethodName      = "/auth.AuthService/Logout"
+	AuthService_GetUserInfo_FullMethodName = "/auth.AuthService/GetUserInfo"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -35,6 +36,7 @@ type AuthServiceClient interface {
 	RefreshS(ctx context.Context, in *RefreshToken, opts ...grpc.CallOption) (*RefreshResult, error)
 	Verify(ctx context.Context, in *VerifyToken, opts ...grpc.CallOption) (*VerifyResult, error)
 	Logout(ctx context.Context, in *LogoutToken, opts ...grpc.CallOption) (*LogoutResult, error)
+	GetUserInfo(ctx context.Context, in *GetUser, opts ...grpc.CallOption) (*User, error)
 }
 
 type authServiceClient struct {
@@ -90,6 +92,15 @@ func (c *authServiceClient) Logout(ctx context.Context, in *LogoutToken, opts ..
 	return out, nil
 }
 
+func (c *authServiceClient) GetUserInfo(ctx context.Context, in *GetUser, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, AuthService_GetUserInfo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations should embed UnimplementedAuthServiceServer
 // for forward compatibility
@@ -99,6 +110,7 @@ type AuthServiceServer interface {
 	RefreshS(context.Context, *RefreshToken) (*RefreshResult, error)
 	Verify(context.Context, *VerifyToken) (*VerifyResult, error)
 	Logout(context.Context, *LogoutToken) (*LogoutResult, error)
+	GetUserInfo(context.Context, *GetUser) (*User, error)
 }
 
 // UnimplementedAuthServiceServer should be embedded to have forward compatible implementations.
@@ -119,6 +131,9 @@ func (UnimplementedAuthServiceServer) Verify(context.Context, *VerifyToken) (*Ve
 }
 func (UnimplementedAuthServiceServer) Logout(context.Context, *LogoutToken) (*LogoutResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
+}
+func (UnimplementedAuthServiceServer) GetUserInfo(context.Context, *GetUser) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserInfo not implemented")
 }
 
 // UnsafeAuthServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -222,6 +237,24 @@ func _AuthService_Logout_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUser)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).GetUserInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_GetUserInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).GetUserInfo(ctx, req.(*GetUser))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -248,6 +281,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Logout",
 			Handler:    _AuthService_Logout_Handler,
+		},
+		{
+			MethodName: "GetUserInfo",
+			Handler:    _AuthService_GetUserInfo_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

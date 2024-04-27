@@ -41,7 +41,35 @@ type AuthService struct {
 	name string
 }
 
-//更新を開始する関数
+// GetUserInfo implements agrpc.AuthServiceServer.
+func (auths *AuthService) GetUserInfo(ctx context.Context, user_data *agrpc.GetUser) (*agrpc.User, error) {
+	//シークレット検証
+	if user_data.Secret != os.Getenv("Token_Secret") {
+		//シークレットが一致しない場合
+		log.Println("invalid secret")
+		return nil, errors.New("invalid secret")
+	}
+
+	//ユーザ取得
+	user, err := database.GetUser(user_data.UserId)
+
+	//エラー処理
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	return &agrpc.User{
+		UserId:      user.UserID,
+		Name:        user.Name,
+		Email:       user.Email,
+		Icon:        user.IconURL,
+		Provider:    user.Provider,
+		ProviderUID: user.ProviderID,
+	}, nil
+}
+
+// 更新を開始する関数
 // Refresh implements agrpc.AuthServiceServer.
 func (auths *AuthService) Refresh(ctx context.Context, token_data *agrpc.RefreshToken) (*agrpc.RefreshResult, error) {
 	//シークレット検証
@@ -65,7 +93,7 @@ func (auths *AuthService) Refresh(ctx context.Context, token_data *agrpc.Refresh
 		}, errors.New("invalid token")
 	}
 
-	//トークンを更新する 
+	//トークンを更新する
 	result, err := database.UpdateToken(valid_data)
 
 	//エラー処理
@@ -80,10 +108,10 @@ func (auths *AuthService) Refresh(ctx context.Context, token_data *agrpc.Refresh
 	return &agrpc.RefreshResult{
 		Success: true,
 		Token:   result,
-	},nil
+	}, nil
 }
 
-//更新を確定する関数
+// 更新を確定する関数
 // RefreshS implements agrpc.AuthServiceServer.
 func (auths *AuthService) RefreshS(ctx context.Context, token_data *agrpc.RefreshToken) (*agrpc.RefreshResult, error) {
 	//シークレット検証
@@ -121,7 +149,7 @@ func (auths *AuthService) RefreshS(ctx context.Context, token_data *agrpc.Refres
 	//結果を返す
 	return &agrpc.RefreshResult{
 		Success: true,
-	},nil
+	}, nil
 }
 
 // Logout implements agrpc.AuthServiceServer.

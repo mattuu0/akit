@@ -50,10 +50,21 @@ message RefreshResult {
     string token = 2;
 }
 
+message GetUser {
+    string UserId = 1;
+    string Secret = 2;
+}
+
+message GetUser_Result {
+    bool success = 1;
+    User user = 2;
+}
+
 service AuthService {
     rpc GetToken(GetData) returns (TokenResult) {}              //トークンを取得(引き換え)する
     rpc Refresh(RefreshToken) returns (RefreshResult) {}        //更新を開始する
     rpc RefreshS(RefreshToken) returns (RefreshResult) {}       //更新を確定する
     rpc Verify(VerifyToken) returns (VerifyResult) {}           //トークンを認証する
     rpc Logout(LogoutToken) returns (LogoutResult) {}           //トークンを無効化する
+    rpc GetUserInfo(GetUser) returns (User) {}                  //ユーザー情報を取得する
 }
