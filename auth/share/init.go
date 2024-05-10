@@ -11,7 +11,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/discord"
+	//"github.com/markbates/goth/providers/discord"
+	"github.com/markbates/goth/providers/microsoftonline"
 
 	"github.com/gorilla/sessions"
 )
@@ -41,7 +42,8 @@ func Init() {
 //プロバイダ初期化
 func Provider_init() {
 	goth.UseProviders(
-		discord.New(os.Getenv("DISCORD_CLIENT_ID"), os.Getenv("DISCORD_CLIENT_SECRET"), os.Getenv("DISCORD_CALLBACK_URL"), discord.ScopeIdentify, discord.ScopeEmail),
+		//discord.New(os.Getenv("DISCORD_CLIENT_ID"), os.Getenv("DISCORD_CLIENT_SECRET"), os.Getenv("DISCORD_CALLBACK_URL"), discord.ScopeIdentify, discord.ScopeEmail),
+		microsoftonline.New(os.Getenv("Microsoft_ClientID"), os.Getenv("Microsoft_ClientSecret"), os.Getenv("Microsoft_CallbackURL")),
 	)
 }
 

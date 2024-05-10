@@ -4,6 +4,7 @@
 
 テンプレート
 ```
+# 使いたいプロバイダごとに増やす
 # Oauth プロバイダのキーなど
 DISCORD_CLIENT_ID = 
 DISCORD_CLIENT_SECRET = 
@@ -27,3 +28,13 @@ Token_Redis_DB = 0
 JWT_Secret = 
 ```
 
+## init.go の Provider_init 関数を編集する
+```go
+func Provider_init() {
+	goth.UseProviders(
+		//ここにプロバイダを増やしていく
+		discord.New(os.Getenv("DISCORD_CLIENT_ID"), os.Getenv("DISCORD_CLIENT_SECRET"), os.Getenv("DISCORD_CALLBACK_URL"), discord.ScopeIdentify, discord.ScopeEmail),
+	)
+}
+
+```
