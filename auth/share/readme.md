@@ -12,7 +12,7 @@ DISCORD_CALLBACK_URL =
 
 # ランダムな文字列 (64文字くらい)
 Session_Key = 
-Session_MaxAge = 
+Session_MaxAge = 2592000
 
 # ランダムな文字列 (64文字くらい)
 Transaction_Store_Secret = 
