@@ -12,7 +12,6 @@ import (
 	"github.com/gin-contrib/sessions/cookie"
 )
 
-
 func main() {
 	Init()
 

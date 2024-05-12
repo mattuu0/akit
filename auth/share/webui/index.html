@@ -1,20 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理画面</title>
 
-    <link rel="stylesheet" href="./bootstrap-5.3.0-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./bootstrap-5.3.0-dist/css/bootstrap.css">
+    <script src="./bootstrap-5.3.0-dist/js/bootstrap.bundle.min.js"></script>
 </head>
-<body>
-    <header>
-        <h1>管理画面</h1>
-    </header>
-    <main>
 
+<body style="width: 100vw; height: 100vh;">
+    <main style="width: 100vw; height: 100%;">
+        <div class="d-flex w-100 h-100">
+
+            <div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px; height: 100%;">
+                <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+                    <svg class="bi me-2" width="40" height="32">
+                        <use xlink:href="#bootstrap"></use>
+                    </svg>
+                    <span class="fs-4">ユーザー管理</span>
+                </a>
+                <hr>
+                <div class="h-100">
+                    <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist"
+                        aria-orientation="vertical">
+                        <button class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill"
+                            data-bs-target="#v-pills-home" type="button" role="tab" aria-controls="v-pills-home"
+                            aria-selected="true">ホーム</button>
+                        <button class="nav-link mt-2" id="v-pills-profile-tab" data-bs-toggle="pill"
+                            data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile"
+                            aria-selected="false">ユーザー</button>
+                    </div>
+                </div>
+                <hr>
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle"
+                        id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                        <strong>mdo</strong>
+                    </a>
+                    <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
+                        <li><a class="dropdown-item" href="#">Sign out</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tab-content w-100 h-100" id="v-pills-tabContent">
+                <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel"
+                    aria-labelledby="v-pills-home-tab" tabindex="0">
+                    <div class="w-100 h-100">
+                        <table class="table table-hover" style="table-layout: fixed; text-align: center;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px;" scoep="col">#</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">名前</th>
+                                    <th scope="col">Last</th>
+                                    <th scope="col">管理</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr >
+                                    <th style="width: 30px;">
+                                        <input type="checkbox">
+                                    </th>
+                                    <td scope="row" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">fb7d74f497ddcda3b3fe3e9cab9d68f49de95c619ebdf20992f85318272569e789f749fd0a919b38deea9d107dc980efdf91852fd68209833a55218556725cc3</td>
+                                    <td>Mark</td>
+                                    <td>Otto</td>
+                                    <td>@mdo</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab"
+                    tabindex="0">
+                    
+                </div>
+            </div>
+
+        </div>
     </main>
 
-    <script src="./bootstrap-5.3.0-dist/js/bootstrap.min.js"></script>
 </body>
+
 </html>

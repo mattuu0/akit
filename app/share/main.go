@@ -22,7 +22,7 @@ func main() {
 
 	router := gin.Default()
 
-	//ミドルウェア設定
+	//ミドルウェア設定>
 	router.Use(AuthMiddleware())
 
 	router.GET("/callback", func(ctx *gin.Context) {
